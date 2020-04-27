@@ -14,7 +14,6 @@ Single-row function returns one row of results for each record processed.
 | Character Manipulation Functions | `SUBSTR`,  `INSTR`,  `LENGTH`,  `LPAD` , `RPAD`, `LTRIM`, `RTRIM`, `REPLACE`, `TRANSLATE`, `CONCAT` |
 | Numeric Functions                | `ROUND`, `TRUNC`, `MOD`, `ABS`, `POWER`                      |
 | Date Functions                   | `MONTHS_BETWEEN`, `ADD_MONTHS`, `NEXT_DAY`, `LAST_DAY`, `TO_DATE`, `ROUND`, `TRUNC`, `CURRENT_DATE` |
-| Regular Expressions              | `REGEXP_LIKE`, `REGEXP_SUBSTR`                               |
 | Other Functions                  | `NVL`, `NVL2`, `NULLIF`, `TO_CHAR`, `DECODE`, `CASE expression`, `SOUNDEX`, `TO_NUMBER` |
 
 
@@ -105,20 +104,73 @@ SELECT REPLACE(address, 'P.O.', 'POST OFFICE')
 -- TRANSLATE(STRING, CHARACTER, REPLACE_STRING)
 SELECT TRANSLATE(name, ',', '-') FROM contacts;
 
---
+-- CONCAT
+-- Used to concatenate data from two columns.
+-- CONCAT(data1, data2)
+-- The main difference between the concatenation operator and CONCAT function is that you can only combine any long lists of columns and string literal with concatenation operator, but not only two columns with CONCAT function.
+SELECT CONCAT('Customer''s Name:', customer#) FROM customers;
 ```
 
 
 
 #### Numeric Functions
 
+```sql
+-- ROUND
+-- Used to round numbers to the stated precision.
+-- ROUND(number, position)
+--    a positive value for p indicates a position to the right of decimal
+--    a negative value for p indicates a position to the left of decimal
+SELECT ROUND(retail, 2), ROUND(retail, 0), ROUND(retail, -1) FROM books;
+
+-- TRUNC
+-- Used to truncate value to the specific position, any number after that position will be removed simply.
+-- TRUNC(number, position)
+--    a positive value for p indicates a position to the right of decimal
+--    a negative value for p indicates a position to the left of decimal
+SELECT TRUNC(retail, 2), TRUNC(retail, 0), TRUNC(retail, -1) FROM books;
+
+-- MOD
+-- Return a reminder of a division operation
+-- MOD(numerator, denominator)
+SELECT TRUNC(235/16, 0), MOD(235, 16) FROM DUAL;
+
+-- ABS
+-- Return a positive or absolute value of numeric values supplied as arguments.
+-- ABS(number)
+SELECT ABS(ROUND(pubdate - SYSDATE, 0)) FROM books;
+```
+
 
 
 #### Date Functions
 
+By default, Oracle 12C displays data value in a `DD-MON-YY` format: 02-FEB-09.
 
+Although user references a date value as a nonnumeric field, it is actually stored in a numeric format that includes century, year, month, day, hours, minutes and seconds.
 
-#### Regular Expression
+The valid range is from `January 1, 4712 B.C.` to `December 31 9999 A.D.`
+
+```sql
+-- MONTH_BETWEEN
+-- determines the number of months between two dates.
+-- MONTH_BETWEEN(date1, date2)
+--   		date2 is subtracted from date1
+SELECT MONTH_BETWEEN(pubdate, SYSDATE) FROM books;
+
+-- ADD_MONTH
+-- ADD_MONTH(date, month)
+--		date represents the begining date for the calculation.
+--    month represents the number of month to be added to the date.
+SELECT ADD_MONTH(SYSDATE, 2) FROM DUAL;
+
+-- NEXT_DAY
+-- determine the next occurrence of a specific day of the week after a given day
+-- NEXT_DAY(date, DAY)
+--			date represents the start date
+--      DAY represents the day of week to identify.
+SELECT NEXT_DAY(orderdate, 'MONDAY') FROM orders;
+```
 
 
 
