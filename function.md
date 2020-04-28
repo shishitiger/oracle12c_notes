@@ -170,9 +170,135 @@ SELECT ADD_MONTH(SYSDATE, 2) FROM DUAL;
 --			date represents the start date
 --      DAY represents the day of week to identify.
 SELECT NEXT_DAY(orderdate, 'MONDAY') FROM orders;
+
+-- LAST_DAY
+-- determine the last day of the month of the given date
+-- LAST_DAY(date)
+SELECT LAST_DAY(orderdate) FROM orders;
+
+-- ROUND
+-- A date can be rounded by the unit of month or year
+-- ROUND(date, unit)
+--      date represents the date value
+--      unit represents the unit to use for rounding
+SELECT pubdate, ROUND(pubdate, 'YEAR'), ROUND(pubdate, 'MONTH') FROM books;
+
+-- CURRENT_DATE
+-- Return the current date and time from the user session, client tool that connects to database server. Generally, they are in separated computer so that the session time zone setting is different from database's time zone setting.
+
+-- SYSDATE
+-- Return the current date and time from the database server
+
+-- TIMESTAMP VS DATE
+-- TIMESTAMP datetype is available for storing time zone as part of date value.
+-- DATE does not store time zone information.
 ```
 
 
 
 #### Other Function
+
+```sql
+-- NVL
+-- Can address the problem caused when performing arithmetic operations with fields might be NULL value. It is used to substitute a value for the existing NULL so that the calculation can be executed.
+-- NVL(x, y)
+-- 			y represents the value to substitute if x is NULL.
+SELECT retail - NVL(discount, 0) - cost AS "profit" FROM books;
+SELECT  NVL(shipdate, '06-APR09') FROM orders;
+
+-- NVL2
+-- a variation of NVL function.
+-- NVL2(x, y, z)
+-- 			y represents the value to substitute if x is not NULL.
+--      z represents the value to substitute if x is NULL.
+SELECT NVL2(shipdate, 'SHIPPED', 'NOT SHIPPED') AS status FROM orders;
+
+-- NULLIF
+-- Used to compare two values for equality. If they are equal, return NULL. Otherwise, return the first of the two values.
+-- NULLIF(first, second)
+SELECT NVL2(NULLIF(oi.paideach, b.retail), 'Sale Price', 'Regular Price')
+	FROM books b
+	INNER JOIN orderitem oi ON oi.isbn = b.isbn;
+
+-- TO_CHAR
+-- Used to convert the data or numeric to a formatted character string.
+-- TO_CHAR(value, format)
+SELECT title, TO_CHAR(pubdate, 'MONTH DD YYYYY') AS "Publication Date",
+	TO_CHAR(retial, '$99999.99') AS "Retail Price"
+	FROM books;
+
+-- DECODE
+-- Takes a specific value and compare it to values in a list. if a match is found, return one specified value, otherwise, return a default value. If no default value, NUll will be returned.
+-- DECODE(value, L1, R1, L2, R2,.... default)
+--       value represents the value that you are searching for.
+--       L1 L2 represents the item value in a list.
+--       R1, R2 represents the result if L1 matches value.
+--       default represents the result if no match is found.
+SELECT customer#, state, 
+	DECODE(
+		state, 'CA', .08,
+    			 'FL', .07,
+    							0
+	) AS "Sale Tax Rate"
+from customers;
+
+-- CASE
+-- is similar to the DECODE function, but it can perform IF ELSE processing. 
+SELECT lname, fname,
+	CASE
+		WHEN (MONTH_BETWEEN('01-JUL-09', hiredate) /12) < 4 THEN 'LEVEL 1'
+		WHEN (MONTH_BETWEEN('01-JUL-09', hiredate) /12) < 8 THEN 'LEVEL 2'
+		WHEN (MONTH_BETWEEN('01-JUL-09', hiredate) /12) < 11 THEN 'LEVEL 3'
+		WHEN (MONTH_BETWEEN('01-JUL-09', hiredate) /12) < 15 THEN 'LEVEL 4'
+		ELSE 'LEVEL 5'
+	END "Retire Level"
+FROM employees;
+```
+
+
+
+### Group-Rows Function
+
+Also called `Multiple-Rows Function`, returns a result per group of rows processed.
+
+<u>All `Group-Rows Function`, except `COUNT(*)`, ignore `NULL` values. If you want to include `NULL` values, please nest the `NVL` inside the `Group-Rows Function`.</u>
+
+```sql
+-- SUM
+-- Used to calculate the total amount stored in a numeric column for a group of records.
+-- SUM([ALL|DISTINCT] n)
+--			n represents the column that contains numeric values.
+--      DISTINCT is optional that instructs oracle to include only unique value in the calculation.
+--      ALL is the default value and also optional that instructs oracle to include all occurrences of values when totaling a field.
+SELECT SUM((paideach - cost) * quantity) AS "Total Profit"
+	FROM books 
+	INNER JOIN orderitem USING(isbn)
+	
+-- AVG
+-- Used to calculate the average amount stored in a numeric column for a group of records.
+-- AVG([ALL|DISTINCT] n)
+SELECT AVG(retail - cost - NVL(discount, 0)) AS 'Average Profit'
+	FROM books;
+	
+-- COUNT
+-- Can count the records  having non-NULL values in a specified column, or count the total records meating a specific condition including those containing NULL values.
+-- COUNT([ALL|DISTINCT] n)
+SELECT COUNT(DISTINCT category) FROM books;
+SELECT COUNT(category) FROM books;
+
+SELECT COUNT(shipdate) FROM orders;
+SELECT COUNT(*) FROM orders;
+
+-- MAX
+-- Used to calculate the largest values stored in a numeric column for a group of records.
+-- MAX([ALL|DISTINCT] c)
+--			c can represent any numeric, character, or date column.
+SELECT title, MAX(retail - cost - NVL(discount, 0)) AS "Highest Profit" FROM books;
+
+-- MIN
+-- Used to calculate the smallest values stored in a numeric column for a group of records.
+-- MIN([ALL|DISTINCT] c)
+--			c can represent any numeric, character, or date column.
+SELECT title, MIN(retail - cost - NVL(discount, 0)) AS "Lowest Profit" FROM books;
+```
 
